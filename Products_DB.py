@@ -30,4 +30,4 @@ for category, items in products.items():
 
 df_products = pd.DataFrame(data)
 
-df_products.to_csv('Products_database_en.csv', index=False, encoding='utf-8-sig')
+df_products.to_csv('Products_database.csv', index=False, encoding='utf-8-sig')

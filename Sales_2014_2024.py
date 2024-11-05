@@ -173,7 +173,7 @@ def generate_database(start_date, end_date):
                     actualized_price = round(base_price * increment_percentage, 2)
                     products[category][product_name] = (product_id, actualized_price)
 
-        if current_date.weekday() == 6:  # Chill on sunday no work
+        if current_date.weekday() == 6:  # Chill on sunday no work :)
             current_date += timedelta(days=1)
             continue
 
@@ -241,4 +241,4 @@ end_date = datetime(2024, 12, 31)
 
 df_database = generate_database(start_date, end_date)
 
-df_database.to_csv('D:/Users/w44rn/Documents/00_Data/FVH/Sales_database_en.csv', index=False, encoding='utf-8-sig')
+df_database.to_csv('Sales_database.csv', index=False, encoding='utf-8-sig')
