@@ -1,2 +1,2 @@
 # FVH
- Fruits, vegetables and herbs atabase generator
+ Fruits, vegetables and herbs database generator
