@@ -169,7 +169,7 @@ def generate_database(start_date, end_date):
             for category, items in products.items():
                 for product_name, (product_id, base_price) in items.items():
                     # Price modulation each month
-                    increment_percentage = np.random.choice([random.uniform(0.995, 1.0075),random.uniform(0.985, 1.0175),random.uniform(0.955, 1.0625),random.uniform(0.92, 1.085)],p=[0.65, 0.2, 0.1, 0.05])
+                    increment_percentage = np.random.choice([random.uniform(0.995, 1.0075),random.uniform(0.985, 1.0175),random.uniform(0.955, 1.0625),random.uniform(0.92, 1.085)],p=[0.65, 0.20, 0.10, 0.05])
                     actualized_price = round(base_price * increment_percentage, 2)
                     products[category][product_name] = (product_id, actualized_price)
 
@@ -182,23 +182,23 @@ def generate_database(start_date, end_date):
                 if random.random() > 0.75:
                     continue
 
-                purchase_price = float(round(actualized_price * np.random.choice([random.uniform(0.92, 1.08),random.uniform(0.84, 1.16),random.uniform(0.78, 1.22),random.uniform(0.5, 1.5)],p=[0.5, 0.3, 0.15, 0.05]), 2))
+                purchase_price = float(round(actualized_price * np.random.choice([random.uniform(0.84, 1.08),random.uniform(0.80, 1.16),random.uniform(0.76, 1.22),random.uniform(0.50, 1.50)],p=[0.50, 0.30, 0.15, 0.05]), 2))
 
                 # Define sale_price with margin based on category
                 if category == 'Fruits':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(1.05, 1.09), random.uniform(1.08, 1.14), random.uniform(1.15, 1.75), random.uniform(0.5, 1)],
-                        p=[0.5, 0.35, 0.1, 0.05]
+                        [random.uniform(0.95, 1.50), random.uniform(0.95, 1.85), random.uniform(2.00, 3.00), random.uniform(0.5, 1)],
+                        p=[0.50, 0.35, 0.10, 0.05]
                     ), 2))
                 elif category == 'Vegetables':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(1.03, 1.07), random.uniform(1.05, 1.10), random.uniform(1.1, 1.5), random.uniform(0.8, 1)],
-                        p=[0.5, 0.35, 0.1, 0.05]
+                        [random.uniform(0.98, 1.45), random.uniform(0.96, 1.75), random.uniform(1.75, 2.75), random.uniform(0.8, 1.00)],
+                        p=[0.50, 0.35, 0.10, 0.05]
                     ), 2))
                 elif category == 'Herbs':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(1.5, 2), random.uniform(2, 3), random.uniform(3, 10), random.uniform(0.95, 1.25)],
-                        p=[0.5, 0.3, 0.15, 0.05]
+                        [random.uniform(1.50, 2.00), random.uniform(2.00, 7.00), random.uniform(3.00, 15.00), random.uniform(0.75, 1.25)],
+                        p=[0.50, 0.30, 0.15, 0.05]
                     ), 2))
                 
                 # Calculate the seasonal factor for the product and month
@@ -236,9 +236,9 @@ def generate_database(start_date, end_date):
 
 
 # Dates selection
-start_date = datetime(2004, 1, 1)
+start_date = datetime(2000, 1, 1)
 end_date = datetime(2024, 12, 31)
 
 df_database = generate_database(start_date, end_date)
 
-df_database.to_csv('Sales_database.csv', index=False, encoding='utf-8-sig')
+df_database.to_csv('Sales_database_2000_2024.csv', index=False, encoding='utf-8-sig')
