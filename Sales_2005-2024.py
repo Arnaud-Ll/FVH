@@ -3,6 +3,7 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 
+# Dict of elements
 products = {
     'Fruits': {
         'Apple': (101, 1.54), 'Banana': (102, 1.25), 'Orange': (103, 1.58), 'Pear': (104, 1.98),
@@ -160,7 +161,10 @@ def select_buyer(region):
 def generate_database(start_date, end_date):
     data = []
     current_date = start_date
-    last_month = start_date.month  # Track the initial month
+    last_month = start_date.month  # Select the initial month
+
+    # Initialize daily multipliers for each product
+    daily_multipliers = {product_id: 1.0 for category in products.values() for product_id, _ in category.values()}
 
     while current_date <= end_date:
         # Check for new month and adjust prices
@@ -169,11 +173,15 @@ def generate_database(start_date, end_date):
             for category, items in products.items():
                 for product_name, (product_id, base_price) in items.items():
                     # Price modulation each month
-                    increment_percentage = np.random.choice([random.uniform(0.995, 1.0075),random.uniform(0.985, 1.0175),random.uniform(0.955, 1.0625),random.uniform(0.92, 1.085)],p=[0.65, 0.20, 0.10, 0.05])
+                    increment_percentage = np.random.choice(
+                        [random.uniform(0.995, 1.0075), random.uniform(0.985, 1.0175),
+                         random.uniform(0.955, 1.0625), random.uniform(0.92, 1.085)],
+                        p=[0.65, 0.20, 0.10, 0.05]
+                    )
                     actualized_price = round(base_price * increment_percentage, 2)
                     products[category][product_name] = (product_id, actualized_price)
 
-        if current_date.weekday() == 6:  # Chill on sunday no work :)
+        if current_date.weekday() == 6:  # Chill on Sunday buddy, no work :)
             current_date += timedelta(days=1)
             continue
 
@@ -182,41 +190,65 @@ def generate_database(start_date, end_date):
                 if random.random() > 0.75:
                     continue
 
-                purchase_price = float(round(actualized_price * np.random.choice([random.uniform(0.84, 1.08),random.uniform(0.80, 1.16),random.uniform(0.76, 1.22),random.uniform(0.50, 1.50)],p=[0.50, 0.30, 0.15, 0.05]), 2))
+                purchase_price = float(round(actualized_price * np.random.choice(
+                    [random.uniform(0.84, 1.08), random.uniform(0.80, 1.16),
+                     random.uniform(0.76, 1.22), random.uniform(0.50, 1.50)],
+                    p=[0.50, 0.30, 0.15, 0.05]
+                ), 2))
 
-                # Define sale_price with margin based on category
+                # Define sale_price with margin based on product category
                 if category == 'Fruits':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(0.95, 1.50), random.uniform(0.95, 1.85), random.uniform(2.00, 3.00), random.uniform(0.5, 1)],
+                        [random.uniform(0.95, 1.50), random.uniform(0.95, 1.85),
+                         random.uniform(2.00, 3.00), random.uniform(0.5, 1)],
                         p=[0.50, 0.35, 0.10, 0.05]
                     ), 2))
                 elif category == 'Vegetables':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(0.98, 1.45), random.uniform(0.96, 1.75), random.uniform(1.75, 2.75), random.uniform(0.8, 1.00)],
+                        [random.uniform(0.98, 1.45), random.uniform(0.96, 1.75),
+                         random.uniform(1.75, 2.75), random.uniform(0.8, 1.00)],
                         p=[0.50, 0.35, 0.10, 0.05]
                     ), 2))
                 elif category == 'Herbs':
                     sale_price = float(round(purchase_price * np.random.choice(
-                        [random.uniform(1.50, 2.00), random.uniform(2.00, 7.00), random.uniform(3.00, 15.00), random.uniform(0.75, 1.25)],
+                        [random.uniform(1.50, 2.00), random.uniform(2.00, 7.00),
+                         random.uniform(3.00, 15.00), random.uniform(0.75, 1.25)],
                         p=[0.50, 0.30, 0.15, 0.05]
                     ), 2))
-                
+
                 # Calculate the seasonal factor for the product and month
                 month_index = current_date.month - 1  # 0 for January, 11 for December
                 seasonal_factor = seasonal_factors.get(product_name, [1] * 12)[month_index] / 100
 
-                # Adjust daily sales quantity using seasonal factor and days in the month
-                days_in_month = (current_date.replace(day=28) + timedelta(days=4)).day  # Finds last day of the month
-                daily_sales_quantity = round(annual_sales_quantities[product_id] * seasonal_factor / days_in_month * np.random.choice([random.uniform(0.75, 1.25), random.uniform(0.75, 2), random.uniform(1.5, 3), random.uniform(2, 10)], p=[0.35, 0.35, 0.25, 0.05]), 2)
+                # Increment the daily multiplier for each product
+                daily_multipliers[product_id] *= np.random.choice(
+                    [random.uniform(0.999995, 1.00005), random.uniform(0.9999, 1.0001), random.uniform(0.9998, 1.00015), random.uniform(0.999, 1.00173)],
+                    p=[0.50, 0.25, 0.20, 0.05]
+                )
 
+                # Adjust daily sales quantity using seasonal factor, daily multiplier, and days within the month
+                days_in_month = (current_date.replace(day=28) + timedelta(days=4)).day  # Finds last day of the month
+                daily_sales_quantity = round((
+                    annual_sales_quantities[product_id] * seasonal_factor / days_in_month * np.random.choice(
+                        [random.uniform(0.75, 1.25), random.uniform(0.75, 2),
+                         random.uniform(1.5, 3), random.uniform(2, 10)],
+                        p=[0.35, 0.35, 0.25, 0.05]
+                    ) * daily_multipliers[product_id] ), 2
+                )
+                # Distribution of sales between the different regions
                 for region, region_percentage in region_distribution.items():
                     region_quantity = daily_sales_quantity * region_percentage
 
+                    # Distribution of sales between the different buyers
                     for buyer, buyer_percentage in buyers[region]:
                         quantity_purchased = int(region_quantity * (buyer_percentage / 100) / 30)
-                        quantity_sold = int(round(quantity_purchased * np.random.choice([random.uniform(0.99, 1),random.uniform(0.95, 0.99),random.uniform(0.90, 0.95),random.uniform(0.5, 0.9)],p=[0.5, 0.4, 0.09, 0.01]), 0))
-                        
+                        quantity_sold = int(round(quantity_purchased * np.random.choice(
+                            [random.uniform(0.99, 1), random.uniform(0.95, 0.99),
+                             random.uniform(0.90, 0.95), random.uniform(0.5, 0.9)],
+                            p=[0.5, 0.4, 0.09, 0.01]
+                        ), 0))
 
+                        # Creation of the df and its columns
                         data.append({
                             "Purchase Date": current_date.strftime('%Y-%m-%d'), "Product ID": product_id,
                             "Quantity Purchased (kg)": quantity_purchased, "Purchase Price": purchase_price,
@@ -235,7 +267,8 @@ def generate_database(start_date, end_date):
     return df
 
 
-# Dates selection
+
+# Dates selection ### IMPORTANT IF YOU WANT TO CHANGE THE PERIOD OF DATA CREATION ### Count between 20Mo and 25Mo of file size per year
 start_date = datetime(2000, 1, 1)
 end_date = datetime(2024, 12, 31)
 
